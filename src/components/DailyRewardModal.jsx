@@ -1,4 +1,5 @@
 import { Modal, Box, Typography, Button } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 export default function DailyRewardModal({ open, gold, onClose }) {
   const handleClose = (event, reason) => {
@@ -8,6 +9,8 @@ export default function DailyRewardModal({ open, gold, onClose }) {
     onClose();
   };
 
+  const theme = useTheme();
+
   return (
     <Modal open={open} onClose={handleClose}>
       <Box
@@ -16,10 +19,11 @@ export default function DailyRewardModal({ open, gold, onClose }) {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          bgcolor: "#ffffff",
           p: 4,
+          border: "2px solid white",
           borderRadius: 2,
           textAlign: "center",
+          backgroundColor: theme.palette.background.paper
         }}
       >
         <Typography variant="h6">Daily Reward 🎁</Typography>

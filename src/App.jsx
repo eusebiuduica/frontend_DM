@@ -16,12 +16,54 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSnackbar } from "notistack";
 import { updateGold } from "./slices/userDetails";
-import { addOrder, updateOrder, removeOrder } from "./slices/marketplaceDetails";
+import { setCollection } from "./slices/collectionDetails.js"
+import { setOrders, addOrder, updateOrder, removeOrder } from "./slices/marketplaceDetails";
 
 function useSSE() {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const loginToken = useSelector(state => state.userDetails.loginToken);
+
+  useEffect(() => {
+    if (!loginToken) return;
+
+    async function fetchCollections() {
+      const res = await fetch('http://localhost:8080/collection/cards', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${loginToken}` // token în header
+        }
+      });
+
+      if (!res.ok) throw new Error('Network response was not ok');
+
+      const data = await res.json(); // parse JSON
+      dispatch(setCollection(data));
+    }
+
+    fetchCollections();
+  }, [dispatch, loginToken]);
+
+  useEffect(() => {
+    if (!loginToken) return;
+
+    fetch("http://localhost:8080/marketplace/getAll", {
+      headers: {
+        "Authorization": `Bearer ${loginToken}`,
+        "Content-Type": "application/json"
+      }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then(data => {
+        dispatch(setOrders(data));
+      })
+      .catch(err => console.error("Fetch error:", err));
+  }, [loginToken]);
+
 
   useEffect(() => {
 

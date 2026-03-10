@@ -1,45 +1,66 @@
-import { useEffect, useState } from 'react';
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
+import React, { useEffect, useState, useMemo } from 'react';
 import { Container, Box, Grid, Fab, Stack, Tooltip } from '@mui/material';
 import CollectionSellComponent from '../components/CollectionSellComponent';
 import SellBadge from '../components/SellBadge';
 import { updateGold } from "../slices/userDetails";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import ReplayIcon from '@mui/icons-material/Replay';
+import { updateCard } from "../slices/collectionDetails";
+import { VirtuosoGrid } from 'react-virtuoso';
+
+const CARD_WIDTH = 150;
+
+const gridComponents = {
+    List: React.forwardRef(({ style, children }, ref) => (
+        <div
+            ref={ref}
+            style={{
+                ...style,
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'center', // centrat
+                gap: 16,                  // spațiu între cărți
+            }}
+        >
+            {children}
+        </div>
+    )),
+    Item: ({ children, ...props }) => <div {...props}>{children}</div>,
+};
 
 function CollectionSellPage() {
+    const cards = useSelector((state) => state.collectionDetails.cards);
     const [sellCards, setSellCards] = useState({});
-    const [totalSellGold, setTotalSellGold] = useState(0);
+
+    const totalSellGold = useMemo(() => {
+        return Object.values(sellCards).reduce((acc, card) => {
+            return acc + card.sellQuantity * card.sellGold;
+        }, 0);
+    }, [sellCards]);
 
     const dispatch = useDispatch();
 
     useEffect(() => {
-        fetch("http://localhost:8080/collection/cards_for_sell", {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-            },
-        })
-            .then((res) => {
-                if (!res.ok) throw new Error("Not found!");
-                return res.json();
-            })
-            .then((cards) => {
-              
-                const cardMap = {};
-                cards.forEach(card => { cardMap[card.id] = { ...card, sellQuantity: 0 } });
-                setSellCards(cardMap);
-            })
-            .catch(console.error);
-    }, []);
+        if (cards) {
+            const cardMap = {};
+            cards.forEach(card => {
+                cardMap[card.id] = { ...card, sellQuantity: 0 };
+            });
+            setSellCards(cardMap);
+        }
+    }, [cards]);
 
     const handleOnSell = async () => {
         const token = localStorage.getItem("authToken");
 
-        const cardsSold = Object.values(sellCards)
-            .filter(c => c.sellQuantity > 0)
-            .map(c => ({ cardId: c.id, quantity: c.sellQuantity }));
+        const cardsSold = Object.entries(sellCards)
+            .filter(([key, c]) => c.sellQuantity > 0)
+            .map(([key, c]) => ({ id: key, quantity: c.sellQuantity }));
 
         try {
-            const response = await fetch("http://localhost:8080/collection/sell", {
+            const response = await fetch(`${API_URL}/collection/sell`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -52,30 +73,39 @@ function CollectionSellPage() {
 
             const result = await response.json();
 
-         
+
             setSellCards(prev => {
-                const newMap = { ...prev };
-                Object.values(newMap).forEach(c => {
-                    const soldCard = cardsSold.find(s => s.cardId === c.id);
-                    if (soldCard) {
-                        c.quantity -= soldCard.quantity;     
-                        c.sellQuantity = 0;                  
+                let hasChange = false;
+
+                const newMap = { ...prev }; // nou pentru React
+
+                cardsSold.forEach(soldCard => {
+                    const oldCard = prev[soldCard.id];
+                    if (!oldCard) return;
+
+                    const newQuantity = oldCard.quantity - soldCard.quantity;
+                    if (newQuantity !== oldCard.quantity) hasChange = true;
+
+                    if (newQuantity <= 0) {
+                        delete newMap[soldCard.id];
+                        hasChange = true;
+                    } else {
+                        newMap[soldCard.id] = {
+                            ...oldCard,
+                            quantity: newQuantity,
+                            sellQuantity: 0
+                        };
                     }
                 });
 
-               
-                Object.keys(newMap).forEach(key => {
-                    if (newMap[key].quantity <= 0) {
-                        delete newMap[key];
-                    }
-                });
-
-                return newMap;
+                return hasChange ? newMap : prev; // dacă nu s-a schimbat nimic, return prev
             });
 
-
             dispatch(updateGold(result.gold));
-            setTotalSellGold(0);
+
+            cardsSold.forEach(card => {
+                dispatch(updateCard({ id: card.id, quantity: -card.quantity }));
+            });
 
             console.log("Sell successful:", result);
         } catch (error) {
@@ -83,59 +113,75 @@ function CollectionSellPage() {
         }
     };
 
-   
-    const handleQuantityChange = (cardId, quantity) => {
-        setSellCards(prev => {
-            const oldQuantity = prev[cardId].sellQuantity;
-            const cardPrice = prev[cardId].sellGold;
 
-         
-            setTotalSellGold(prevTotal => prevTotal - (oldQuantity * cardPrice) + (quantity * cardPrice));
-
-            
-            return {
-                ...prev,
-                [cardId]: { ...prev[cardId], sellQuantity: quantity }
-            };
-        });
-    };
+    const handleQuantityChange = React.useCallback((cardId, quantity) => {
+        setSellCards(prev => ({
+            ...prev,
+            [cardId]: {
+                ...prev[cardId],
+                sellQuantity: quantity
+            }
+        }));
+    }, []);
 
     const handleReset = () => {
-        setTotalSellGold(0);
+
+        const cardsForSell = Object.values(sellCards)
+            .filter(c => c.sellQuantity > 0)
+            .map(c => ({ cardId: c.id, quantity: c.sellQuantity }));
+
         setSellCards(prev => {
             const newMap = { ...prev };
-            Object.values(newMap).forEach(c => c.sellQuantity = 0);
+
+            cardsForSell.forEach(card => {
+                const oldCard = prev[card.cardId];
+                if (!oldCard) return;
+                newMap[card.cardId] = {
+                    ...oldCard,
+                    sellQuantity: 0
+                };
+            });
+
             return newMap;
         });
     };
 
+    const cardsFiltered = Object.values(sellCards).filter(c => c.quantity > 0);
+
     return (
         <>
-            <Container maxWidth="xl" sx={{ py: 4 }}>
-                <Box
-                    sx={{
-                        height: '79vh',
-                        overflowY: 'auto',
-                        padding: 1,
-                        border: '1px solid #ddd',
-                    }}
-                >
-                    <Grid container spacing={4}>
-                        {Object.values(sellCards).filter(c => c.quantity > 0).map(card => (
-                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }} key={card.id}>
+
+            <Box
+                sx={{
+
+                    overflowY: 'auto',
+                    padding: 1,
+                    border: '1px solid #ddd',
+                }}
+            >
+
+                <VirtuosoGrid
+                    totalCount={cardsFiltered.length}
+                    components={gridComponents}
+                    itemContent={(index) => {
+                        const card = cardsFiltered[index];
+                        return (
+                            <Box key={card.id} width={CARD_WIDTH}>
                                 <CollectionSellComponent
                                     card={card}
                                     onQuantityChange={handleQuantityChange}
                                 />
-                            </Grid>
-                        ))}
-                    </Grid>
-                </Box>
-            </Container>
+                            </Box>
+                        );
+                    }}
+                    style={{ height: '600px' }} // height scroll
+                />
+            </Box>
+
             <Stack spacing={10} sx={{ position: "fixed", top: 80, right: 30, zIndex: 1000 }}>
                 <SellBadge gold={totalSellGold} onSell={handleOnSell} />
 
-              
+
                 <Tooltip title="Reset selected cards" arrow placement="left">
                     <Fab sx={{ width: 70, height: 70 }} onClick={handleReset}>
                         <ReplayIcon sx={{ fontSize: 32 }} />

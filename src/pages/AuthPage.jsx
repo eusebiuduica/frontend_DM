@@ -10,7 +10,7 @@ export default function AuthPage() {
         <Box
             sx={{
                 minHeight: "100vh",
-                backgroundImage: "url(/resources/other/login-bg.jpg)",
+                backgroundImage: "url(/resources/other/login-bg.webp)",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
                 backgroundColor: "#000",
@@ -27,7 +27,7 @@ export default function AuthPage() {
                     position: "absolute",
                     top: 20,
                     right: 20,
-                    border: "solid #ff0000",
+                    border: "solid #ffffff",
                     borderRadius: 3
                 }}
             >
@@ -42,7 +42,7 @@ export default function AuthPage() {
                     centered
                     textColor="inherit"
                     indicatorColor="secondary"
-                    sx={{ color: "#ff0000" }}  
+                    sx={{ color: "#ffffff" }}  
                 >
                     <Tab
                         label="Login"

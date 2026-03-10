@@ -4,7 +4,7 @@ const sellDetailsSlice = createSlice({
     name: 'sellDetails',
     initialState: {
         totalGold: 0,
-        cardQuantities: {}, 
+        cardQuantities: {},
         cardsForSell: {}
     },
     reducers: {
@@ -14,10 +14,10 @@ const sellDetailsSlice = createSlice({
             const difference = newQuantity - oldQuantity;
             const goldChange = difference * pricePerCard;
 
-          
+
             state.cardQuantities[cardId] = newQuantity;
 
-       
+
             state.totalGold += goldChange;
         },
         setTotalGold: (state, action) => {
@@ -33,22 +33,22 @@ const sellDetailsSlice = createSlice({
             );
         },
         addCardsForSell: (state, action) => {
-            const cards = action.payload; 
+            const cards = action.payload;
 
             cards.forEach(card => {
                 const existing = state.cardsForSell[card.id];
 
                 if (!existing) {
-                   
+
                     state.cardsForSell[card.id] = { ...card };
                 } else {
-                    
+
                     existing.quantity += card.quantity;
                 }
             });
         },
         removeCardsForSell: (state, action) => {
-            const cards = action.payload; 
+            const cards = action.payload;
 
             cards.forEach(card => {
                 const existing = state.cardsForSell[card.id];
@@ -60,9 +60,14 @@ const sellDetailsSlice = createSlice({
                     existing.quantity = 0;
                 }
             });
+        },
+        resetAllSell: (state) => {
+            state.totalGold = 0;
+            state.cardQuantities = {};
+            state.cardsForSell = {};
         }
     }
 });
 
-export const { updateCardQuantity, setTotalGold, resetSell, setCardsForSell, addCardsForSell, removeCardsForSell } = sellDetailsSlice.actions;
+export const { updateCardQuantity, setTotalGold, resetSell, setCardsForSell, addCardsForSell, removeCardsForSell, resetAllSell } = sellDetailsSlice.actions;
 export default sellDetailsSlice.reducer;

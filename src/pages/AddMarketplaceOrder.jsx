@@ -7,32 +7,15 @@ import {
   Typography
 } from "@mui/material";
 import SelectedCardForm from "../components/SelectedCardForm";
-import { setCardsForSell } from '../slices/sellDetails';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 export default function AddMarketplaceOrder() {
+  const allCards = useSelector((state) => state.collectionDetails.cards);
   const [selectedCard, setSelectedCard] = useState(null);
-  const sellCards = useSelector((state) => state.sellDetails.cardsForSell);
-  const dispatch = useDispatch();
-  useEffect(() => {
-    fetch("http://localhost:8080/collection/cards_for_sell", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Not found!");
-        return res.json();
-      })
-      .then((cards) => {
-        dispatch(setCardsForSell(cards));
-      })
-      .catch(console.error);
-  }, [dispatch]);
 
   return (
     <Box display="flex" height="calc(100vh - 64px)">
-   
+
       <Box width="70%" borderRight="1px solid #ddd" p={2}>
 
         <Box
@@ -42,7 +25,7 @@ export default function AddMarketplaceOrder() {
           }}
         >
           <Grid container spacing={2} padding={2}>
-            {Object.values(sellCards).
+            {Object.values(allCards).
               filter(card => card.quantity > 0).
               map(card => {
                 const selected = selectedCard?.id === card.id;
@@ -61,7 +44,7 @@ export default function AddMarketplaceOrder() {
                     >
                       <CardMedia
                         component="img"
-                        image={`http://localhost:8080/${card.image}`}
+                        image={`/resources/cards/${card.image}`}
                         alt={card.name}
                       />
 

@@ -1,9 +1,13 @@
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
 import { useEffect, useState } from "react";
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import BoosterComponent from "../components/BoosterComponent";
 import OpenBoosterModal from "../components/OpenBoosterModal";
 import { useDispatch } from "react-redux";
 import { updateGold } from "../slices/userDetails";
+import { updateCard } from "../slices/collectionDetails";
+
 import { useSnackbar } from "notistack";
 
 export default function BoosterShopPage() {
@@ -15,7 +19,7 @@ export default function BoosterShopPage() {
     const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
-        fetch("http://localhost:8080/booster/all", {
+        fetch(`${API_URL}/booster/all`, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("authToken")}`,
             },
@@ -31,7 +35,7 @@ export default function BoosterShopPage() {
 
     const handleBuy = async (boosterId) => {
         try {
-            const res = await fetch("http://localhost:8080/booster/buy", {
+            const res = await fetch(`${API_URL}/booster/buy`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -54,11 +58,15 @@ export default function BoosterShopPage() {
             }
 
 
-            // succes
+            // success
             setBoosterCards(data.cards);
             setOpenBooster(true);
             setBoosterId(boosterId);
             dispatch(updateGold(data.goldLeft));
+            
+            data.cards.forEach(card => {
+                dispatch(updateCard({ id: card.id, quantity: 1 }));
+            });
 
         } catch (err) {
             console.error("Buy failed", err);

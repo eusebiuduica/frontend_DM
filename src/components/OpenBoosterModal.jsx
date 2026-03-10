@@ -1,13 +1,12 @@
-import { Modal, Box, Typography, Button, Grid } from "@mui/material";
+import { Modal, Box, Typography, Button, Grid, Dialog } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { useState } from "react";
 
 export default function OpenBoosterModal({ open, boosterId, cards, onClose }) {
-    const boosterBackgrounds = {
-        1: "/resources/other/DM-01_Background.webp",
-        2: "/resources/boosters/bg_water.webp",
-        3: "/resources/boosters/bg_dark.webp",
-        4: "/resources/boosters/bg_fire.webp",
-        5: "/resources/boosters/bg_nature.webp",
-    };
+    const theme = useTheme();
+
+    const [openImage, setOpenImage] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
 
     const handleClose = (event, reason) => {
         if (reason === "backdropClick") {
@@ -17,70 +16,78 @@ export default function OpenBoosterModal({ open, boosterId, cards, onClose }) {
     };
 
     return (
-        <Modal open={open} onClose={handleClose}>
-            <Box
-                sx={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    display: "inline-block",
-                    borderRadius: 2,
-                    overflow: "hidden",
-                    width: "auto",
-                    height: "auto",
-                    maxWidth: "90vw",
-                    maxHeight: "90vh",
-                    //backgroundImage: `url(${boosterBackgrounds[boosterId]})`,
-                    //backgroundSize: "contain",
-                    //backgroundRepeat: "no-repeat",
-                    //backgroundPosition: "center",
-                }}
-            >
-
-                <Typography
-                    variant="h6"
-                    sx={{ mb: 3, textAlign: "center", fontWeight: "bold" }}
+        <>
+            <Modal open={open} onClose={handleClose}>
+                <Box
+                    sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        p: 4,
+                        border: "2px solid white",
+                        borderRadius: 2,
+                        textAlign: "center",
+                        backgroundColor: theme.palette.background.paper
+                    }}
                 >
-                    Cards
-                </Typography>
 
-                <Grid container spacing={2} justifyContent="center">
-                    {cards.map((card) => (
-                        <Grid item xs={6} sm={4} md={3} lg={2} key={card.id}>
-                            <Box
-                                sx={{
-                                    border: "1px solid #e0e0e0",
-                                    borderRadius: 1,
-                                    p: 1,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    height: 180,
-                                    bgcolor: "transparent",
-                                }}
-                            >
-                                <img
-                                    src={`http://localhost:8080/${card.image}`}
-                                    alt={card.name}
-                                    style={{
-                                        maxWidth: "100%",
-                                        maxHeight: "100%",
-                                        objectFit: "contain",
+                    <Typography
+                        variant="h6"
+                        sx={{ mb: 3, textAlign: "center", fontWeight: "bold" }}
+                    >
+                        Cards
+                    </Typography>
+
+                    <Grid container spacing={2} justifyContent="center">
+                        {cards.map((card) => (
+                            <Grid item xs={6} sm={4} md={3} lg={2} key={card.id}>
+                                <Box
+                                    sx={{
+                                        border: "1px solid #e0e0e0",
+                                        borderRadius: 1,
+                                        p: 1,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        height: 180,
                                     }}
-                                />
-                            </Box>
-                        </Grid>
-                    ))}
-                </Grid>
+                                >
+                                    <img
+                                        src={`/resources/cards/images/${String(card.id).padStart(4, '0')}.webp`}
+                                        style={{
+                                            maxWidth: "100%",
+                                            maxHeight: "100%",
+                                            objectFit: "contain",
+                                            cursor: "pointer"
+                                        }}
+                                        onClick={() => {
+                                            setSelectedImage(`/resources/cards/images/${String(card.id).padStart(4, '0')}.webp`);
+                                            setOpenImage(true);
+                                        }}
+                                    />
 
-                <Box sx={{ textAlign: "center", mt: 3 }}>
-                    <Button variant="contained" onClick={onClose}>
-                        OK
-                    </Button>
+                                </Box>
+                            </Grid>
+                        ))}
+                    </Grid>
+
+                    <Box sx={{ textAlign: "center", mt: 3 }}>
+                        <Button variant="contained" onClick={onClose}>
+                            OK
+                        </Button>
+                    </Box>
                 </Box>
-            </Box>
-        </Modal>
 
+            </Modal>
+            {/* Modal dialog for big picture */}
+            <Dialog open={openImage} onClose={() => setOpenImage(false)}>
+                <img
+                    src={selectedImage}
+                    alt="card-large"
+                    style={{ maxWidth: "400px" }}
+                />
+            </Dialog>
+        </>
     );
 }

@@ -31,8 +31,12 @@ const decksDetailsSlice = createSlice({
         setPreviewDeck: (state, action) => {
             state.previewDeck = action.payload;
         },
+        resetAllDecks: (state) => {
+            state.previewDeck = {};
+            state.decks =[];
+        }
     }
 });
 
-export const { setDecks, addDeck, editDeck, removeDeck, removeAllDecks, setPreviewDeck } = decksDetailsSlice.actions;
+export const { setDecks, addDeck, editDeck, removeDeck, removeAllDecks, setPreviewDeck, resetAllDecks } = decksDetailsSlice.actions;
 export default decksDetailsSlice.reducer;

@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
 import { useState, useEffect } from "react";
 import {
     Box,
@@ -9,6 +11,7 @@ import {
 } from "@mui/material";
 import { removeCardsForSell } from '../slices/sellDetails';
 import { useDispatch } from "react-redux";
+import { updateCard } from '../slices/collectionDetails';
 
 export default function SelectedCardForm({ card, onSold }) {
     const [quantity, setQuantity] = useState(1);
@@ -42,7 +45,7 @@ export default function SelectedCardForm({ card, onSold }) {
     const handleSubmit = async () => {
         const token = localStorage.getItem("authToken");
 
-        await fetch("http://localhost:8080/marketplace/add", {
+        await fetch(`${API_URL}/marketplace/add`, {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -60,6 +63,7 @@ export default function SelectedCardForm({ card, onSold }) {
             quantity: quantity
         };
 
+        dispatch(updateCard({ id: card.id, quantity: -quantity }));
         dispatch(removeCardsForSell([cardToRemove]));
         onSold();
         setQuantity(1);
@@ -75,7 +79,7 @@ export default function SelectedCardForm({ card, onSold }) {
             <Card sx={{ mb: 2, maxWidth: 260 }}>
                 <CardMedia
                     component="img"
-                    image={`http://localhost:8080/${card.image}`}
+                    image={`/resources/cards/${card.image}`}
                     alt={card.name}
                     sx={{
                         height: "auto",         

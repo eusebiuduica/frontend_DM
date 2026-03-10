@@ -1,25 +1,44 @@
-import { Box, Typography, Button, Paper } from "@mui/material";
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
+import { Box, Typography, Button, Paper, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-//import { logout } from "../slices/userDetails";
+import { resetAllUser, setLoginToken } from "../slices/userDetails";
+import { resetAllDecks } from "../slices/decksDetails";
+import { resetAllMarketPlace } from "../slices/marketplaceDetails";
+import { resetAllSell } from "../slices/sellDetails";
+import { useSnackbar } from "notistack";
+import { useState } from "react";
 
 export default function UserDetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const { enqueueSnackbar } = useSnackbar();
   const username = useSelector((state) => state.userDetails.username);
   const gold = useSelector((state) => state.userDetails.gold);
   const token = useSelector((state) => state.userDetails.loginToken);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-  //  dispatch(logout());
+    localStorage.clear();
+    dispatch(resetAllDecks());
+    dispatch(resetAllMarketPlace());
+    dispatch(resetAllSell());
+    dispatch(resetAllUser());
+    dispatch(setLoginToken(null));
     navigate("/login", { replace: true });
   };
 
-  const handleDelete = async () => {
+  const handleDeleteClose = (event, reason) => {
+    if (reason === "backdropClick") {
+      return;
+    }
+    setIsDeleteModalOpen(false);
+  };
+
+  const confirmDelete = async () => {
     try {
-      const res = await fetch("http://localhost:8080/user/delete", {
+      const res = await fetch(`${API_URL}/delete`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -27,16 +46,21 @@ export default function UserDetails() {
       });
 
       if (!res.ok) {
-        alert("Delete failed");
+        enqueueSnackbar("Delete failed!", { variant: "error" });
         return;
       }
 
       localStorage.removeItem("authToken");
-      dispatch(logout());
-      navigate("/register", { replace: true });
+      localStorage.clear();
+      dispatch(resetAllDecks());
+      dispatch(resetAllMarketPlace());
+      dispatch(resetAllSell());
+      dispatch(resetAllUser());
+      dispatch(setLoginToken(null));
+      navigate("/login", { replace: true });
 
     } catch (err) {
-      console.error("Delete error", err);
+      enqueueSnackbar("Delete failed!", { variant: "error" });
     }
   };
 
@@ -60,11 +84,32 @@ export default function UserDetails() {
             Logout
           </Button>
 
-          <Button variant="contained" color="error" onClick={handleDelete}>
+          <Button variant="contained" color="error" onClick={() => setIsDeleteModalOpen(true)}>
             Delete Account
           </Button>
         </Box>
       </Paper>
+      <Dialog
+        open={isDeleteModalOpen}
+        onClose={handleDeleteClose}
+      >
+        <DialogTitle>Delete account</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete{" "}
+            <Typography component="span" fontWeight="bold" color="error">
+              your account
+            </Typography>
+            ?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
+          <Button color="error" onClick={confirmDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

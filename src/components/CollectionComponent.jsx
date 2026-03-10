@@ -10,20 +10,23 @@ export default function CollectionComponent({ card }) {
         p: 2,
         textAlign: 'center',
         borderRadius: '2%',
-        backgroundColor: theme.palette.background.paper, // sau .default
+        backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.primary
       }}
     >
       <img
-        src={`http://localhost:8080/${card.image}`}
+        src={`/resources/cards/${card.image}`}
         alt={card.name}
+        width="100%"
+        height="auto"
+        loading="lazy"
         style={{
-          maxWidth: '100%',
+          aspectRatio: '403 / 560',
           maxHeight: 200,
           objectFit: 'contain'
         }}
       />
-      <Box>In Collection: {card.quantity}</Box>
+      <Box>In Collection: {card.quantity} + {card.inPackage}</Box>
       <Box>In Package: {card.inPackage}</Box>
     </Box>
   );

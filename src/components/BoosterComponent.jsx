@@ -6,7 +6,7 @@ export default function BoosterComponent({ booster, onBuy }) {
             <CardMedia
                 component="img"
                 height="auto"
-                image={`http://localhost:8080/${booster.image}`}
+                image={`/resources/boosters/booster_dm${String(booster.id).padStart(2, '0')}.webp`}
                 alt={booster.boosterName}
             />
 

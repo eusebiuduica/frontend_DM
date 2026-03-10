@@ -1,12 +1,58 @@
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
 import { useState } from "react";
 import {
     Box, TextField, Button, Typography, FormControl,
     InputLabel,
     Select,
-    MenuItem,
-    FormHelperText
+    MenuItem
 } from "@mui/material";
+import { useSnackbar } from "notistack";
 
+
+const civilizations = [
+    { label: "Any", value: 0 },
+
+    {
+        label: "Light",
+        value: 1,
+        img: "/resources/civilizations/Light.webp",
+        width: 40,
+        height: Math.round((621 / 1000) * 40),
+    },
+
+    {
+        label: "Water",
+        value: 2,
+        img: "/resources/civilizations/Water.webp",
+        width: 40,
+        height: Math.round((449 / 1000) * 40),
+    },
+
+    {
+        label: "Darkness",
+        value: 3,
+        img: "/resources/civilizations/Darkness.webp",
+        width: 40,
+        height: Math.round((391 / 1000) * 40),
+    },
+
+    {
+        label: "Fire",
+        value: 4,
+        img: "/resources/civilizations/Fire.webp",
+        width: 40,
+        height: Math.round((625 / 1000) * 40),
+    },
+
+    {
+        label: "Nature",
+        value: 5,
+        img: "/resources/civilizations/Nature.webp",
+        width: 40,
+        height: Math.round((370 / 1000) * 40),
+    },
+];
 
 export default function RegisterForm() {
     const [username, setUsername] = useState("");
@@ -14,6 +60,7 @@ export default function RegisterForm() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [civilization, setCivilization] = useState("");
     const [errors, setErrors] = useState("");
+    const { enqueueSnackbar } = useSnackbar();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,7 +74,7 @@ export default function RegisterForm() {
 
 
         try {
-            const res = await fetch("http://localhost:8080/register", {
+            const res = await fetch(`${API_URL}/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -42,9 +89,12 @@ export default function RegisterForm() {
                 setErrors(data.errors);
                 return;
             }
+            setUsername("");
+            setPassword("");
+            setConfirmPassword("");
+            setCivilization("");
 
-
-            console.log("Registered successfully");
+            enqueueSnackbar("Registered successfully!", { variant: "success" });
         } catch {
             setErrors("Server error. Try again later.");
         }
@@ -58,7 +108,7 @@ export default function RegisterForm() {
             <Typography color="error" sx={{ whiteSpace: "pre-line" }}>
                 {errors}
             </Typography>
-            
+
             <TextField
                 label="Username"
                 value={username}
@@ -103,77 +153,24 @@ export default function RegisterForm() {
                     sx: { color: "#FFFFFF" }
                 }}
             />
-            <FormControl
-                sx={{
-                    width: 200,
-                    "& .MuiOutlinedInput-root": {
-                        color: "#FFFFFF",
-                        "& fieldset": { borderColor: "#FFFFFF" },
-                        "&:hover fieldset": { borderColor: "#FFFFFF" },
-                        "&.Mui-focused fieldset": { borderColor: "#FFFFFF" }
-                    },
-                    "& .MuiInputLabel-root": { color: "#FFFFFF" },
-                    "& .MuiSelect-icon": { color: "#FFFFFF" }
-                }}
-            >
-                <InputLabel id="civilization-label">Civilization</InputLabel>
 
-                <Select
-                    labelId="civilization-label"
-                    label="Civilization"
-                    value={civilization}
-                    onChange={(e) => setCivilization(e.target.value)}
-                    renderValue={(value) => {
-                        const civ = {
-                            1: { label: "Light", img: "/resources/civilizations/Light.png" },
-                            2: { label: "Water", img: "/resources/civilizations/Water.png" },
-                            3: { label: "Darkness", img: "/resources/civilizations/Darkness.png" },
-                            4: { label: "Fire", img: "/resources/civilizations/Fire.png" },
-                            5: { label: "Nature", img: "/resources/civilizations/Nature.png" },
-                        }[value];
-
-                        return (
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                <img src={civ.img} width={40} height={24} />
-                                {civ.label}
+            <FormControl sx={{ minWidth: 120 }}>
+                <InputLabel>Civilization</InputLabel>
+                <Select value={civilization} onChange={(e) => setCivilization(e.target.value)} label="Civilization">
+                    {civilizations.map((c) => (
+                        <MenuItem key={c.value} value={c.value}>
+                            <Box display="flex" alignItems="center" gap={1}>
+                                {c.value !== 0 && (
+                                    <img
+                                        src={c.img}
+                                        alt={c.label}
+                                        style={{ width: c.width, height: c.height }}
+                                    />
+                                )}
+                                {c.label}
                             </Box>
-                        );
-                    }}
-                >
-                    <MenuItem value={1}>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <img src="/resources/civilizations/Light.png" width={40} height={16} />
-                            Light
-                        </Box>
-                    </MenuItem>
-
-                    <MenuItem value={2}>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <img src="/resources/civilizations/Water.png" width={40} height={16} />
-                            Water
-                        </Box>
-                    </MenuItem>
-
-                    <MenuItem value={3}>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <img src="/resources/civilizations/Darkness.png" width={40} height={16} />
-                            Darkness
-                        </Box>
-                    </MenuItem>
-
-                    <MenuItem value={4}>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <img src="/resources/civilizations/Fire.png" width={40} height={16} />
-                            Fire
-                        </Box>
-                    </MenuItem>
-
-                    <MenuItem value={5}>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <img src="/resources/civilizations/Nature.png" width={40} height={16} />
-                            Nature
-                        </Box>
-                    </MenuItem>
+                        </MenuItem>
+                    ))}
                 </Select>
             </FormControl>
 

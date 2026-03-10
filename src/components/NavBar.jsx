@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
 import { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Button, Menu, MenuItem, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router';
@@ -37,7 +39,7 @@ function Navbar() {
         const token = localStorage.getItem("authToken");
         if (!token) return;
 
-        fetch("http://localhost:8080/user/me", {
+        fetch(`${API_URL}/user/me`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -77,7 +79,7 @@ function Navbar() {
                     color="inherit" onClick={() => { handleSetNavBarText("Home"); navigate("/home"); }}
                 >
                     <img
-                        src="/resources/other/icoApp.png"
+                        src="/resources/other/icoApp.webp"
                         alt="home"
                         style={{ width: 24, height: 24, marginRight: 8 }}
                     />
@@ -91,7 +93,7 @@ function Navbar() {
                     aria-haspopup="true"
                 >
                     <img
-                        src="/resources/other/collection.png"
+                        src="/resources/other/collection.webp"
                         alt="home"
                         style={{ width: 23, height: 32, marginRight: 8 }}
                     />
@@ -167,7 +169,7 @@ function Navbar() {
                     aria-haspopup="true"
                 >
                     <img
-                        src="/resources/other/collection.png"
+                        src="/resources/other/collection.webp"
                         alt="home"
                         style={{ width: 23, height: 32, marginRight: 8 }}
                     />

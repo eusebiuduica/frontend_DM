@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
 import React, { useState } from "react";
 import {
     Button, Stack, Typography, Card, Dialog, DialogTitle, DialogContent, DialogActions
@@ -5,6 +7,7 @@ import {
 
 import { useDispatch, useSelector } from "react-redux";
 import { removeDeck, setPreviewDeck } from "../slices/decksDetails";
+import { adjustInPackage } from "../slices/collectionDetails";
 
 import EditDeckDialog from "./EditDeckDialog";
 
@@ -17,7 +20,7 @@ function DeckComponent({ deckId }) {
     const confirmDeleteDeck = async () => {
         try {
             const token = localStorage.getItem("authToken");
-            const res = await fetch(`http://localhost:8080/deck/delete`, {
+            const res = await fetch(`${API_URL}/deck/delete`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -26,10 +29,15 @@ function DeckComponent({ deckId }) {
                 body: JSON.stringify(deckId),
             });
 
+            const data = await res.json();
 
             if (!res.ok) throw new Error("Failed to delete deck");
 
             dispatch(removeDeck(deckId))
+
+            data.forEach(card => {
+                dispatch(adjustInPackage({ id: card.id, quantity: card.quantity }));
+            });
 
             setIsDeleteDialogOpen(false);
         } catch (err) {

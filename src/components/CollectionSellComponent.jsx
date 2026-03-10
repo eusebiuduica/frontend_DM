@@ -1,7 +1,9 @@
-import { Box, TextField } from '@mui/material';
+import { Box, TextField, Dialog } from '@mui/material';
+import { useState } from 'react';
 import React from 'react';
 
 function CollectionSellComponent({ card, onQuantityChange }) {
+  const [openImage, setOpenImage] = useState(false);
   const handleChange = (e) => {
     const value = Math.max(0, Math.min(card.quantity, parseInt(e.target.value) || 0));
     onQuantityChange(card.id, value);
@@ -10,9 +12,12 @@ function CollectionSellComponent({ card, onQuantityChange }) {
   return (
     <Box sx={{ border: '1px solid #ddd', p: 2, textAlign: 'center' }}>
       <img
-        src={`http://localhost:8080/${card.image}`}
+        src={`/resources/cards/${card.image}`}
         alt={card.id}
-        style={{ maxWidth: '100%', maxHeight: 200, objectFit: 'contain' }}
+        style={{ maxWidth: '100%', maxHeight: 200, objectFit: 'contain', cursor: "pointer" }}
+        onClick={() =>
+          setOpenImage(true)
+        }
       />
       <Box sx={{ mt: 1 }}>
         <strong>Available:</strong> {card.quantity}
@@ -27,6 +32,14 @@ function CollectionSellComponent({ card, onQuantityChange }) {
         sx={{ mt: 2 }}
         fullWidth
       />
+      {/* Modal dialog for big picture */}
+      <Dialog open={openImage} onClose={() => setOpenImage(false)}>
+        <img
+          src={`/resources/cards/${card.image}`}
+          alt={`card-large-${card.id}`}
+          style={{ maxWidth: "400px" }}
+        />
+      </Dialog>
     </Box>
   );
 }

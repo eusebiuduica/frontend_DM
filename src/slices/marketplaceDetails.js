@@ -36,6 +36,9 @@ const marketplaceDetailsSlice = createSlice({
           ...updated
         };
       }
+    },
+    resetAllMarketPlace: (state) => {
+      state.orders = [];
     }
   }
 });
@@ -44,7 +47,8 @@ export const {
   setOrders,
   addOrder,
   removeOrder,
-  updateOrder
+  updateOrder,
+  resetAllMarketPlace
 } = marketplaceDetailsSlice.actions;
 
 export default marketplaceDetailsSlice.reducer;

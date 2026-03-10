@@ -1,7 +1,9 @@
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
 import { useState } from "react";
 import { Box, TextField, Button, Typography } from "@mui/material";
 import { useNavigate } from 'react-router';
-import { updateGold, setLoginToken } from "../slices/userDetails";
+import { updateGold, setLoginToken, setUsername } from "../slices/userDetails";
 import { useDispatch } from "react-redux";
 
 export default function LoginForm() {
@@ -18,7 +20,7 @@ export default function LoginForm() {
         setGeneralError("");
 
         try {
-            const res = await fetch("http://localhost:8080/login", {
+            const res = await fetch(`${API_URL}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -43,6 +45,7 @@ export default function LoginForm() {
 
                 localStorage.setItem("navBarText", "Home");
                 dispatch(setLoginToken(data.token));
+                dispatch(setUsername(email));
                 navigate("/home", { replace: true });
             }
         } catch (err) {

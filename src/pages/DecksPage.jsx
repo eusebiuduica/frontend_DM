@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
 import React, { useState, useEffect } from "react";
 import { Box, Button, Stack, CircularProgress, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import DeckComponent from "../components/DeckComponent";
@@ -6,6 +8,7 @@ import CreateDeckDialog from "../components/CreateDeckDialog";
 import { useDispatch } from "react-redux";
 import { setDecks } from "../slices/decksDetails";
 import { useSelector } from "react-redux";
+import { resetInPackageToQuantity } from "../slices/collectionDetails";
 
 
 export default function DecksPage() {
@@ -24,7 +27,7 @@ export default function DecksPage() {
   const confirmDeleteAllDecks = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const res = await fetch(`http://localhost:8080/deck/delete_all`, {
+      const res = await fetch(`${API_URL}/deck/delete_all`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`
@@ -35,7 +38,7 @@ export default function DecksPage() {
       if (!res.ok) throw new Error("Failed to delete the decks");
 
       dispatch(setDecks([]));
-
+      dispatch(resetInPackageToQuantity());
       setIsDeleteAllDialogOpen(false);
     } catch (err) {
       alert(err.message);
@@ -62,7 +65,7 @@ export default function DecksPage() {
 
     const token = localStorage.getItem("authToken"); // sau de unde îl iei tu
 
-    fetch("http://localhost:8080/deck/get_all", {
+    fetch(`${API_URL}/deck/get_all`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

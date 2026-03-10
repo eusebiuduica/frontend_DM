@@ -1,20 +1,25 @@
 import { useState, useEffect } from "react";
 import {
   Box,
-  Grid,
   Select,
   MenuItem,
   TextField,
   Button,
   InputLabel,
   FormControl,
-  Card,
-  CardMedia,
-  CardContent,
   Typography,
   Checkbox,
   FormControlLabel,
 } from "@mui/material";
+
+import { useSelector } from 'react-redux';
+
+import CollectionGrid from "../components/CollectionGrid";
+
+
+const CARD_WIDTH = 150;    // width of card
+const CARD_HEIGHT = 300;   // height or card
+const COLUMN_COUNT = 6;    // cards per row
 
 const civilizations = [
   { label: "Any", value: 0 },
@@ -22,7 +27,7 @@ const civilizations = [
   {
     label: "Light",
     value: 1,
-    img: "/resources/civilizations/Light.png",
+    img: "/resources/civilizations/Light.webp",
     width: 40,
     height: Math.round((621 / 1000) * 40),
   },
@@ -30,7 +35,7 @@ const civilizations = [
   {
     label: "Water",
     value: 2,
-    img: "/resources/civilizations/Water.png",
+    img: "/resources/civilizations/Water.webp",
     width: 40,
     height: Math.round((449 / 1000) * 40),
   },
@@ -38,7 +43,7 @@ const civilizations = [
   {
     label: "Dark",
     value: 3,
-    img: "/resources/civilizations/Darkness.png",
+    img: "/resources/civilizations/Darkness.webp",
     width: 40,
     height: Math.round((391 / 1000) * 40),
   },
@@ -46,7 +51,7 @@ const civilizations = [
   {
     label: "Fire",
     value: 4,
-    img: "/resources/civilizations/Fire.png",
+    img: "/resources/civilizations/Fire.webp",
     width: 40,
     height: Math.round((625 / 1000) * 40),
   },
@@ -54,7 +59,7 @@ const civilizations = [
   {
     label: "Nature",
     value: 5,
-    img: "/resources/civilizations/Nature.png",
+    img: "/resources/civilizations/Nature.webp",
     width: 40,
     height: Math.round((370 / 1000) * 40),
   },
@@ -70,11 +75,11 @@ const types = [
 
 const rarities = [
   { label: "Any", value: 0 },
-  { label: "Common", value: 1, img: "/resources/rarities/rarity-c.png" },
-  { label: "Uncommon", value: 2, img: "/resources/rarities/rarity-u.png" },
-  { label: "Rare", value: 3, img: "/resources/rarities/rarity-r.png" },
-  { label: "Very-Rare", value: 4, img: "/resources/rarities/rarity-vr.png" },
-  { label: "Super-Rare", value: 5, img: "/resources/rarities/rarity-sr.png" },
+  { label: "Common", value: 1, img: "/resources/rarities/rarity-c.webp" },
+  { label: "Uncommon", value: 2, img: "/resources/rarities/rarity-u.webp" },
+  { label: "Rare", value: 3, img: "/resources/rarities/rarity-r.webp" },
+  { label: "Very-Rare", value: 4, img: "/resources/rarities/rarity-vr.webp" },
+  { label: "Super-Rare", value: 5, img: "/resources/rarities/rarity-sr.webp" },
 ];
 
 const sorts = [
@@ -89,7 +94,7 @@ const costOptions = [
 ];
 
 export default function CollectionPage() {
-  const [allCards, setAllCards] = useState([]);
+  const allCards = useSelector((state) => state.collectionDetails.cards);
   const [filteredCards, setFilteredCards] = useState([]);
   const [civilization, setCivilization] = useState(0);
   const [type, setType] = useState(0);
@@ -100,32 +105,8 @@ export default function CollectionPage() {
   const [sortBy, setSortBy] = useState("id");
 
   useEffect(() => {
-    fetchCollection();
-  }, []);
-
-  useEffect(() => {
     applyFilters();
   }, [civilization, type, rarity, cost, power, powerActive, sortBy, allCards]);
-
-  const fetchCollection = async () => {
-    const token = localStorage.getItem("authToken");
-
-    try {
-      const res = await fetch("http://localhost:8080/collection/cards", {
-        method: "GET",
-        headers: {
-          Authorization: "Bearer " + token,
-        },
-      });
-
-      if (!res.ok) throw new Error("Failed to fetch collection");
-
-      const data = await res.json();
-      setAllCards(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const applyFilters = () => {
     let filtered = [...allCards];
@@ -156,34 +137,15 @@ export default function CollectionPage() {
     setSortBy("id");
   };
 
+  const filteredAndVisibleCards = filteredCards.filter(c => c.quantity + c.inPackage > 0);
+
   return (
     <Box display="flex" height="calc(100vh - 64px)">
     
       <Box width="70%" borderRight="1px solid #ddd" p={2}>
-        <Box
-          sx={{
-            height: "85vh",
-            overflowY: "auto"
-          }}
-        >
-          <Grid container spacing={4} justifyContent="center" padding={2}>
-            {filteredCards.map((card) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }} key={card.id}>
-                <Card sx={{ borderRadius: 2, overflow: "hidden" }}>
-                  <CardMedia
-                    component="img"
-                    image={`http://localhost:8080/${card.image}`}
-                    alt={card.name}
-                  />
-                  <CardContent sx={{ textAlign: "center" }}>
-                    <Typography variant="body2">Qty: {card.quantity}</Typography>
-                    <Typography variant="body2" color="text.secondary">In Package: {card.inPackage}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
+        
+          <CollectionGrid cards = {filteredAndVisibleCards}/>
+
       </Box>
 
   
@@ -267,7 +229,7 @@ export default function CollectionPage() {
               type="number"
               value={power}
               onChange={(e) => setPower(Math.max(500, Number(e.target.value)))}
-              disabled={type === 2 || !powerActive} 
+              disabled={type === 2 || !powerActive}
               inputProps={{ step: 500, min: 500 }}
               sx={{ width: 120 }}
             />
@@ -276,7 +238,7 @@ export default function CollectionPage() {
                 <Checkbox
                   checked={powerActive}
                   onChange={(e) => setPowerActive(e.target.checked)}
-                  disabled={type === 2} 
+                  disabled={type === 2}
                 />
               }
               label="Enable Power"
@@ -295,5 +257,5 @@ export default function CollectionPage() {
         </Box>
       </Box>
     </Box>
-  )
+  );
 }
