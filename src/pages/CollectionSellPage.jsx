@@ -1,7 +1,7 @@
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { Container, Box, Grid, Fab, Stack, Tooltip } from '@mui/material';
+import { Box, Fab, Stack, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@mui/material';
 import CollectionSellComponent from '../components/CollectionSellComponent';
 import SellBadge from '../components/SellBadge';
 import { updateGold } from "../slices/userDetails";
@@ -32,7 +32,15 @@ const gridComponents = {
 
 function CollectionSellPage() {
     const cards = useSelector((state) => state.collectionDetails.cards);
+    const [isConfirmSellOpen, setIsConfirmSellOpen] = useState(false);
     const [sellCards, setSellCards] = useState({});
+
+    const handleConfirmSellClose = (event, reason) => {
+        if (reason === "backdropClick") {
+            return;
+        }
+        setIsConfirmSellOpen(false);
+    };
 
     const totalSellGold = useMemo(() => {
         return Object.values(sellCards).reduce((acc, card) => {
@@ -111,6 +119,8 @@ function CollectionSellPage() {
         } catch (error) {
             console.error("Error selling cards:", error);
         }
+
+        setIsConfirmSellOpen(false);
     };
 
 
@@ -179,15 +189,32 @@ function CollectionSellPage() {
             </Box>
 
             <Stack spacing={10} sx={{ position: "fixed", top: 80, right: 30, zIndex: 1000 }}>
-                <SellBadge gold={totalSellGold} onSell={handleOnSell} />
-
+                <SellBadge gold={totalSellGold} onSell={() => setIsConfirmSellOpen(true)} />
 
                 <Tooltip title="Reset selected cards" arrow placement="left">
-                    <Fab sx={{ width: 70, height: 70 }} onClick={handleReset}>
+                    <Fab sx={{ width: 70, height: 70 }} onClick={handleReset} disabled={totalSellGold === 0}>
                         <ReplayIcon sx={{ fontSize: 32 }} />
                     </Fab>
                 </Tooltip>
             </Stack >
+
+            <Dialog
+                open={isConfirmSellOpen}
+                onClose={handleConfirmSellClose}
+            >
+                <DialogTitle>Sell Cards</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Are you sure you want to sell the selected cards?
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setIsConfirmSellOpen(false)}>No</Button>
+                    <Button color="error" onClick={handleOnSell}>
+                        Yes
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 }

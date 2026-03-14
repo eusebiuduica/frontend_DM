@@ -4,6 +4,7 @@ import { Badge, Fab, Tooltip } from "@mui/material";
 const SellBadge = ({ gold, onSell }) => {
   return (
     <Badge
+      invisible={!gold || gold === 0}
       badgeContent={gold || "0"}
       color="success"
       max={999999}
@@ -21,6 +22,7 @@ const SellBadge = ({ gold, onSell }) => {
             height: 70,
           }}
           onClick={onSell}
+          disabled={!gold || gold === 0}
         >
           <img
             src="/resources/other/iconGold.webp"
