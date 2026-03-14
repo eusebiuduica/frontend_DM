@@ -82,7 +82,7 @@ export default function BoosterShopPage() {
 
                 <Grid container spacing={3}>
                     {boosters.map((booster) => (
-                        <Grid item key={booster.id}>
+                        <Grid key={booster.id}>
                             <BoosterComponent booster={booster} onBuy={handleBuy} />
                         </Grid>
                     ))}
