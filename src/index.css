@@ -8,7 +8,6 @@ html, body, #root {
 body {
   overflow: overlay; 
   overflow-y: auto; 
-  background-color: black; /* fundal negru */
-  color: white; /* text alb ca să se vadă */
+  background-color: black;
+  color: white;
 }
-

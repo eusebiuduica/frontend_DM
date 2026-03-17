@@ -4,6 +4,7 @@ import sellDetailsReducer from '../slices/sellDetails'
 import decksDetailsReducer from "../slices/decksDetails"
 import marketplaceDetailsReducer from "../slices/marketplaceDetails"
 import collectionDetailsReducer from "../slices/collectionDetails"
+import boostersDetailsReducer from "../slices/boostersDetails"
 
 const store = configureStore({
     reducer: {
@@ -11,7 +12,8 @@ const store = configureStore({
         sellDetails: sellDetailsReducer,
         decksDetails: decksDetailsReducer,
         marketplaceDetails: marketplaceDetailsReducer,
-        collectionDetails: collectionDetailsReducer
+        collectionDetails: collectionDetailsReducer,
+        boostersDetails: boostersDetailsReducer
     }
 });
 

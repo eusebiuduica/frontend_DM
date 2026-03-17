@@ -10,28 +10,15 @@ import { updateCard } from "../slices/collectionDetails";
 
 import { useSnackbar } from "notistack";
 
+import { useSelector } from 'react-redux';
+
 export default function BoosterShopPage() {
-    const [boosters, setBoosters] = useState([]);
+    const boosters = useSelector((state) => state.boostersDetails.boosters);
     const [boosterCards, setBoosterCards] = useState([]);
     const [openBooster, setOpenBooster] = useState(false);
     const [boosterId, setBoosterId] = useState();
     const dispatch = useDispatch();
     const { enqueueSnackbar } = useSnackbar();
-
-    useEffect(() => {
-        fetch(`${API_URL}/booster/all`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-            },
-        })
-            .then((res) => {
-                if (!res.ok) throw new Error("Unauthorized");
-                return res.json();
-            })
-            .then(setBoosters)
-            .catch(console.error);
-    }, []);
-
 
     const handleBuy = async (boosterId) => {
         try {
@@ -81,7 +68,7 @@ export default function BoosterShopPage() {
             <Box sx={{ p: 4 }}>
 
                 <Grid container spacing={3}>
-                    {boosters.map((booster) => (
+                    {boosters.filter((booster) => booster.quantity > 0).map((booster) => (
                         <Grid key={booster.id}>
                             <BoosterComponent booster={booster} onBuy={handleBuy} />
                         </Grid>

@@ -18,6 +18,10 @@ import { useSnackbar } from "notistack";
 import { updateGold } from "./slices/userDetails";
 import { setCollection } from "./slices/collectionDetails.js"
 import { setOrders, addOrder, updateOrder, removeOrder } from "./slices/marketplaceDetails";
+import { setBoosters } from "./slices/boostersDetails.js";
+import { updateBoosterQuantity } from "./slices/boostersDetails.js";
+
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 function useSSE() {
   const dispatch = useDispatch();
@@ -28,7 +32,7 @@ function useSSE() {
     if (!loginToken) return;
 
     async function fetchCollections() {
-      const res = await fetch('http://localhost:8080/collection/cards', {
+      const res = await fetch(`${API_URL}/collection/cards`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +52,7 @@ function useSSE() {
   useEffect(() => {
     if (!loginToken) return;
 
-    fetch("http://localhost:8080/marketplace/getAll", {
+    fetch(`${API_URL}/marketplace/getAll`, {
       headers: {
         "Authorization": `Bearer ${loginToken}`,
         "Content-Type": "application/json"
@@ -64,12 +68,29 @@ function useSSE() {
       .catch(err => console.error("Fetch error:", err));
   }, [loginToken]);
 
+  useEffect(() => {
+    if (!loginToken) return;
+    fetch(`${API_URL}/booster/all`, {
+      headers: {
+        "Authorization": `Bearer ${loginToken}`,
+        "Content-Type": "application/json"
+      }
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Unauthorized");
+        return res.json();
+      })
+      .then(data => {
+        dispatch(setBoosters(data));
+      })
+      .catch(err => console.error("Fetch error:", err));
+  }, [loginToken]);
 
   useEffect(() => {
 
     if (!loginToken) return;
     const es = new EventSource(
-      `http://localhost:8080/marketplace/stream?token=${loginToken}`
+      `${API_URL}/marketplace/stream?token=${loginToken}`
     );
 
     es.addEventListener("PRODUCT_ADDED", e => {
@@ -94,6 +115,11 @@ function useSSE() {
         autoHideDuration: 5000
       });
       dispatch(updateGold(sale.totalGold));
+    });
+
+    es.addEventListener("BOOSTER_BOUGHT", e => {
+      const boosterUpdate = JSON.parse(e.data);
+      dispatch(updateBoosterQuantity(boosterUpdate));
     });
 
     es.onerror = () => {

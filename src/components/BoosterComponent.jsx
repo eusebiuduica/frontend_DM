@@ -25,6 +25,7 @@ export default function BoosterComponent({ booster, onBuy }) {
 
                 <CardContent>
                     <Typography variant="h6">{booster.name}</Typography>
+                    <Typography variant="h6">Quantity: {booster.quantity}</Typography>
                     <Typography sx={{ mt: 1 }}>
                         Price: <b>{booster.price}</b> gold
                     </Typography>
