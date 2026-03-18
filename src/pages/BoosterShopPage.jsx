@@ -68,7 +68,7 @@ export default function BoosterShopPage() {
             <Box sx={{ p: 4 }}>
 
                 <Grid container spacing={3}>
-                    {boosters.filter((booster) => booster.quantity > 0).map((booster) => (
+                    {boosters.map((booster) => (
                         <Grid key={booster.id}>
                             <BoosterComponent booster={booster} onBuy={handleBuy} />
                         </Grid>

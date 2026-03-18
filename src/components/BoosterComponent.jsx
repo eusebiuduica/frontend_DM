@@ -35,9 +35,9 @@ export default function BoosterComponent({ booster, onBuy }) {
                         variant="contained"
                         fullWidth
                         onClick={() => setIsConfirmBuyOpen(true)}
-                        disabled={!gold || gold < booster.price}
+                        disabled={!booster.quantity || booster.quantity < 1}
                     >
-                        Buy
+                        {!booster.quantity || booster.quantity < 1 ? "Coming back soon" : "Buy"}
                     </Button>
                 </CardContent>
             </Card>
@@ -54,7 +54,7 @@ export default function BoosterComponent({ booster, onBuy }) {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setIsConfirmBuyOpen(false)}>No</Button>
-                    <Button color="success" onClick={() => {onBuy(booster.id); setIsConfirmBuyOpen(false)}}>
+                    <Button color="success" onClick={() => { onBuy(booster.id); setIsConfirmBuyOpen(false) }}>
                         Yes
                     </Button>
                 </DialogActions>

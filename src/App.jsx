@@ -18,8 +18,7 @@ import { useSnackbar } from "notistack";
 import { updateGold } from "./slices/userDetails";
 import { setCollection } from "./slices/collectionDetails.js"
 import { setOrders, addOrder, updateOrder, removeOrder } from "./slices/marketplaceDetails";
-import { setBoosters } from "./slices/boostersDetails.js";
-import { updateBoosterQuantity } from "./slices/boostersDetails.js";
+import { setBoosters, updateBoosterQuantity } from "./slices/boostersDetails.js";
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -120,6 +119,11 @@ function useSSE() {
     es.addEventListener("BOOSTER_BOUGHT", e => {
       const boosterUpdate = JSON.parse(e.data);
       dispatch(updateBoosterQuantity(boosterUpdate));
+    });
+
+    es.addEventListener("DAILY_BOOSTERS_RESET", e => {
+      const boosters = JSON.parse(e.data);
+      dispatch(setBoosters(boosters));
     });
 
     es.onerror = () => {
