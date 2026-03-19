@@ -6,9 +6,10 @@ import DeckComponent from "../components/DeckComponent";
 import DeckPreviewComponent from "../components/DeckPreviewComponent";
 import CreateDeckDialog from "../components/CreateDeckDialog";
 import { useDispatch } from "react-redux";
-import { setDecks } from "../slices/decksDetails";
+import { setDecks, setCurrentNbDecks, incrementMaxNbDecks } from "../slices/decksDetails";
 import { useSelector } from "react-redux";
 import { resetInPackageToQuantity } from "../slices/collectionDetails";
+import { updateGold } from "../slices/userDetails";
 
 
 export default function DecksPage() {
@@ -16,9 +17,14 @@ export default function DecksPage() {
   const [error, setError] = useState(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
+  const [isConfirmBuyDeckSlotOpen, setIsConfirmBuyDeckSlotOpen] = useState(false);
   const dispatch = useDispatch();
   const decks = useSelector((state) => state.decksDetails.decks);
   const hasDecks = decks && decks.length > 0;
+
+  const currentNbDecks = useSelector((state) => state.decksDetails.currentNbDecks);
+  const maxNbDecks = useSelector((state) => state.decksDetails.maxNbDecks);
+  const gold = useSelector((state) => state.userDetails.gold);
 
   const handleDeleteAllDecks = () => {
     setIsDeleteAllDialogOpen(true);
@@ -38,8 +44,32 @@ export default function DecksPage() {
       if (!res.ok) throw new Error("Failed to delete the decks");
 
       dispatch(setDecks([]));
+      dispatch(setCurrentNbDecks(0));
       dispatch(resetInPackageToQuantity());
       setIsDeleteAllDialogOpen(false);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const confirmBuyDeckSlot = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await fetch(`${API_URL}/user/buyDeckSlot`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+
+      if (!res.ok) throw new Error("Failed to delete the decks");
+
+      const data = await res.json();
+
+      dispatch(incrementMaxNbDecks());
+      dispatch(updateGold(data));
+      setIsConfirmBuyDeckSlotOpen(false);
     } catch (err) {
       alert(err.message);
     }
@@ -58,6 +88,13 @@ export default function DecksPage() {
       return;
     }
     setIsDeleteAllDialogOpen(false);
+  };
+
+  const handleBuyDeckSlotClose = (event, reason) => {
+    if (reason === "backdropClick") {
+      return;
+    }
+    setIsConfirmBuyDeckSlotOpen(false);
   };
 
   useEffect(() => {
@@ -110,17 +147,50 @@ export default function DecksPage() {
     <Box display="flex" height="calc(100vh - 64px)">
       {/* Left panel */}
       <Box width="35%" borderRight="1px solid #ddd" p={2}>
-        <Stack direction="row" spacing={1} mb={2}>
-          <Button variant="contained" onClick={() => setIsCreateDialogOpen(true)}>Create Deck</Button>
-          <Button
-            variant="outlined"
-            color="error"
-            disabled={!hasDecks}
-            onClick={handleDeleteAllDecks}
-          >
-            Delete All
-          </Button>
+        <Stack
+          direction="row"
+          spacing={2}
+          mb={2}
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          {/* LEFT SIDE */}
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Button
+              variant="contained"
+              disabled={currentNbDecks >= maxNbDecks}
+              onClick={() => setIsCreateDialogOpen(true)}
+            >
+              Create Deck
+            </Button>
+            <Button
+              variant="outlined"
+              disabled={gold < 10}
+              onClick={() => setIsConfirmBuyDeckSlotOpen(true)}
+              sx={{ display: 'flex', alignItems: 'center', gap: 0 }}
+            >
+              Buy Slot - 10
+              <img
+                src="/resources/other/iconGold.webp"
+                alt="gold"
+                style={{ width: 20, height: 20 }}
+              />
+            </Button>
 
+            <Button
+              variant="outlined"
+              color="error"
+              disabled={!hasDecks}
+              onClick={handleDeleteAllDecks}
+            >
+              Delete All
+            </Button>
+          </Stack>
+
+          {/* RIGHT SIDE */}
+          <Typography fontWeight="bold">
+            {currentNbDecks} / {maxNbDecks}
+          </Typography>
         </Stack>
         <Box
           sx={{
@@ -172,6 +242,25 @@ export default function DecksPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog
+        open={isConfirmBuyDeckSlotOpen}
+        onClose={handleBuyDeckSlotClose}
+      >
+        <DialogTitle>Buy Deck Slot</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want buy a deck slot ?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsConfirmBuyDeckSlotOpen(false)}>Cancel</Button>
+          <Button color="success" onClick={confirmBuyDeckSlot}>
+            Buy
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Box>
   );
 }

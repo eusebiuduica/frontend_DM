@@ -14,7 +14,7 @@ export default function UserDetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const username = useSelector((state) => state.userDetails.username);
+  const username = localStorage.getItem("username");
   const gold = useSelector((state) => state.userDetails.gold);
   const token = useSelector((state) => state.userDetails.loginToken);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);

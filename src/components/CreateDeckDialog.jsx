@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { addDeck } from "../slices/decksDetails";
+import { addDeck, incrementNbDecks } from "../slices/decksDetails";
 import { updateCardQuantity } from "../slices/collectionDetails";
 import { useSnackbar } from "notistack";
 
@@ -91,6 +91,8 @@ export default function CreateDeckDialog({ open, onClose }) {
       selectedCards.forEach(card => {
         dispatch(updateCardQuantity({ id: card.id, quantity: card.quantity }));
       });
+
+      dispatch(incrementNbDecks());
 
       setSelectedCards([]);
       setDeckName("");

@@ -19,6 +19,7 @@ import { updateGold } from "./slices/userDetails";
 import { setCollection } from "./slices/collectionDetails.js"
 import { setOrders, addOrder, updateOrder, removeOrder } from "./slices/marketplaceDetails";
 import { setBoosters, updateBoosterQuantity } from "./slices/boostersDetails.js";
+import { setCurrentNbDecks, setMaxNbDecks } from "./slices/decksDetails.js"
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -63,6 +64,26 @@ function useSSE() {
       })
       .then(data => {
         dispatch(setOrders(data));
+      })
+      .catch(err => console.error("Fetch error:", err));
+  }, [loginToken]);
+
+  useEffect(() => {
+    if (!loginToken) return;
+
+    fetch(`${API_URL}/user/me`, {
+      headers: {
+        "Authorization": `Bearer ${loginToken}`,
+        "Content-Type": "application/json"
+      }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then(data => {
+        dispatch(setCurrentNbDecks(data.currentNbDecks));
+        dispatch(setMaxNbDecks(data.maxNbDecks));
       })
       .catch(err => console.error("Fetch error:", err));
   }, [loginToken]);

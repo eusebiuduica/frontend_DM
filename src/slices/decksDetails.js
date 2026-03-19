@@ -3,10 +3,35 @@ import { createSlice } from '@reduxjs/toolkit';
 const decksDetailsSlice = createSlice({
     name: 'decksDetails',
     initialState: {
+        currentNbDecks: 0,
+        maxNbDecks: 0,
+        deckSlotPrice: 0,
         decks: [],
         previewDeck: {}
     },
     reducers: {
+        setCurrentNbDecks: (state, action) => {
+            state.currentNbDecks = action.payload;
+        },
+        incrementNbDecks: (state) => {
+            if (state.currentNbDecks === state.maxNbDecks)
+                return;
+            state.currentNbDecks += 1;
+        },
+        decrementNbDecks: (state) => {
+            if (state.currentNbDecks == 0)
+                return;
+            state.currentNbDecks -= 1;
+        },
+        setMaxNbDecks: (state, action) => {
+            state.maxNbDecks = action.payload;
+        },
+        incrementMaxNbDecks: (state) => {
+            state.maxNbDecks += 1;
+        },
+        setDeckSlotPrice: (state, action) => {
+            state.deckSlotPrice = action;
+        },
         setDecks: (state, action) => {
             state.decks = action.payload;
         },
@@ -33,10 +58,10 @@ const decksDetailsSlice = createSlice({
         },
         resetAllDecks: (state) => {
             state.previewDeck = {};
-            state.decks =[];
+            state.decks = [];
         }
     }
 });
 
-export const { setDecks, addDeck, editDeck, removeDeck, removeAllDecks, setPreviewDeck, resetAllDecks } = decksDetailsSlice.actions;
+export const { setCurrentNbDecks, incrementNbDecks, decrementNbDecks, setMaxNbDecks, incrementMaxNbDecks, setDecks, addDeck, editDeck, removeDeck, removeAllDecks, setPreviewDeck, resetAllDecks } = decksDetailsSlice.actions;
 export default decksDetailsSlice.reducer;

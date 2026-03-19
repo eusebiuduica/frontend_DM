@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { removeDeck, setPreviewDeck } from "../slices/decksDetails";
+import { removeDeck, setPreviewDeck, decrementNbDecks } from "../slices/decksDetails";
 import { adjustInPackage } from "../slices/collectionDetails";
 
 import EditDeckDialog from "./EditDeckDialog";
@@ -33,7 +33,8 @@ function DeckComponent({ deckId }) {
 
             if (!res.ok) throw new Error("Failed to delete deck");
 
-            dispatch(removeDeck(deckId))
+            dispatch(removeDeck(deckId));
+            dispatch(decrementNbDecks());
 
             data.forEach(card => {
                 dispatch(adjustInPackage({ id: card.id, quantity: card.quantity }));
